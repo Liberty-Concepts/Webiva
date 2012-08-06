@@ -76,11 +76,11 @@ describe SiteTemplate do
     design_part.body.should == "body { color: #F00; }"
   end
 
-  if LESS_AVAILABLE
-    describe 'Less' do
-      it "should support Less in the the design and structual css" do
-        @site_template.style_struct = '@font_size: 13px;' + "\n" + '#space { size: @font_size; }'
-        @site_template.style_design = '@font_color: <cms:var name="font_color" type="color" default="#FFF"/>;' + "\n" 'body { color: @font_color; }'
+  if SCSS_AVAILABLE
+    describe 'SCSS' do
+      it "should support SCSS in the the design and structual css" do
+        @site_template.style_struct = '$font_size: 13px;' + "\n" + '#space { size: $font_size; }'
+        @site_template.style_design = '$font_color: <cms:var name="font_color" type="color" default="#FFF"/>;' + "\n" 'body { color: $font_color; }'
         @site_template.template_html = '<cms:zone name="Main"/>'
         @site_template.save
         @site_template.update_zones_and_options

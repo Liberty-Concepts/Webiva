@@ -103,6 +103,7 @@ Rails::Initializer.run do |config|
   config.gem "fastercsv"
   config.gem "httparty"
   config.gem "resthome", '>= 7.1.0'
+  config.gem "sass", ">= 3.1.20"
 
   if RAILS_ENV == 'test'
     config.gem 'factory_girl',:source => 'http://gemcutter.org'

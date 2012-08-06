@@ -2,8 +2,9 @@
 
 require 'radius'
 require 'pp'
+require 'sass'
 
-LESS_AVAILABLE = false
+SCSS_AVAILABLE = true
 
 class SiteTemplate < DomainModel
 
@@ -137,14 +138,14 @@ class SiteTemplate < DomainModel
 
     begin
       struct_css = template_parser.parse(self.style_struct)
-      struct_css = self.class.render_with_less(struct_css)
+      struct_css = self.class.render_with_scss(struct_css)
     rescue Exception => err
       parsing_errors << ('Error Parsing Structural Styles of %s:' / self.name)  + err.to_s.t
     end
     
     begin
       design_css = template_parser.parse(self.style_design)
-      design_css = self.class.render_with_less(design_css)
+      design_css = self.class.render_with_scss(design_css)
     rescue Exception => err
       parsing_errors << ('Error Parsing Design Styles of %s:' / self.name)  + err.to_s.t
     end
@@ -502,13 +503,14 @@ class SiteTemplate < DomainModel
   
   include SiteTemplate::ParsingMethods
 
-  def self.render_with_less(css, opts={})
-    return css unless LESS_AVAILABLE
+  def self.render_with_scss(css, opts={})
+    return css unless SCSS_AVAILABLE
 
     begin
-      raise Less::SyntaxError.new("@import not supported") if css =~ /\@import/
-      Less.parse(css)
-    rescue Less::SyntaxError, Less::ImportError => e
+      raise Sass::SyntaxError.new("@import not supported") if css =~ /\@import/
+      engine = Sass::Engine.new(css, :syntax => :scss)
+      engine.render
+    rescue Sass::SyntaxError => e
       raise e unless opts[:ignore]
       css
     end
@@ -542,7 +544,7 @@ class SiteTemplate < DomainModel
   end
 
   def parse_css(css, lang)
-    self.class.render_with_less(self.parse_html(css, lang), :ignore => true)
+    self.class.render_with_scss(self.parse_html(css, lang), :ignore => true)
   end
 
   def create_rendered_parts(lang)

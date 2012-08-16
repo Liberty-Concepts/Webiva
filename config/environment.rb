@@ -104,6 +104,7 @@ Rails::Initializer.run do |config|
   config.gem "httparty"
   config.gem "resthome", '>= 7.1.0'
   config.gem "sass", ">= 3.1.20"
+  config.gem "compass", :require => false
 
   if RAILS_ENV == 'test'
     config.gem 'factory_girl',:source => 'http://gemcutter.org'

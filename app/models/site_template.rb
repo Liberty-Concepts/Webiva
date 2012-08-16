@@ -138,14 +138,14 @@ class SiteTemplate < DomainModel
 
     begin
       struct_css = template_parser.parse(self.style_struct)
-      struct_css = self.class.render_with_scss(struct_css)
+      struct_css = self.render_with_scss(struct_css)
     rescue Exception => err
       parsing_errors << ('Error Parsing Structural Styles of %s:' / self.name)  + err.to_s.t
     end
     
     begin
       design_css = template_parser.parse(self.style_design)
-      design_css = self.class.render_with_scss(design_css)
+      design_css = self.render_with_scss(design_css)
     rescue Exception => err
       parsing_errors << ('Error Parsing Design Styles of %s:' / self.name)  + err.to_s.t
     end
@@ -503,12 +503,27 @@ class SiteTemplate < DomainModel
   
   include SiteTemplate::ParsingMethods
 
-  def self.render_with_scss(css, opts={})
+  def render_with_scss(css, opts={})
     return css unless SCSS_AVAILABLE
 
     begin
-      raise Sass::SyntaxError.new("@import not supported") if css =~ /\@import/
-      engine = Sass::Engine.new(css, :syntax => :scss)
+      dop = Marshal.load( Marshal.dump( Sass::Engine::DEFAULT_OPTIONS ) )
+      dop[:syntax] = :scss
+      scss_root = DomainFile.find_by_file_path "/themes/scss"
+      if scss_root
+        scss_root.files.each do |file|
+          dop[:load_paths] << file.abs_storage_directory if file
+        end
+      end
+      
+      partials_root = DomainFile.find_by_file_path "/themes/scss/partials"
+      if partials_root
+        partials_root.files.each do |file|
+          dop[:load_paths] << file.abs_storage_directory if file
+        end
+      end
+
+      engine = Sass::Engine.new(css, dop)
       engine.render
     rescue Sass::SyntaxError => e
       raise e unless opts[:ignore]
@@ -544,7 +559,7 @@ class SiteTemplate < DomainModel
   end
 
   def parse_css(css, lang)
-    self.class.render_with_scss(self.parse_html(css, lang), :ignore => true)
+    self.render_with_scss(self.parse_html(css, lang), :ignore => true)
   end
 
   def create_rendered_parts(lang)

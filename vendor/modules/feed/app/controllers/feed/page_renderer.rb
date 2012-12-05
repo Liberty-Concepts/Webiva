@@ -34,16 +34,22 @@ class Feed::PageRenderer < ParagraphRenderer
       else
         eater = Feed::GenericFeedEater.new(url,@options.format,@options.timeout)
         @output = eater.parse
+        error = eater.error
       end
-      if !@output 
-        if editor?
-          return render_paragraph :text => "Error Fetching Feed"
+      if !@output
+        if error == "Timeout"
+          return render_paragraph :text => "The data you are trying to access could not be retrieved at this time. Please try reloading the page or accessing the information at a later time."
         else
-          cache[:output] = feed_page_show_feature
+          if editor?
+            return render_paragraph :text => "Error Fetching Feed"
+          else
+            cache[:output] = feed_page_show_feature
+          end
         end
       else
         cache[:output] = feed_page_show_feature
       end
+      
     end
 
     render_paragraph :text => result.output

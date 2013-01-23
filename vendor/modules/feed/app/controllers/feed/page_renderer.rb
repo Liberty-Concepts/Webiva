@@ -38,10 +38,10 @@ class Feed::PageRenderer < ParagraphRenderer
       end
       if !@output
         if error == "Timeout"
-          return render_paragraph :text => "The data you are trying to access could not be retrieved at this time. Please try reloading the page or accessing the information at a later time."
+          return render_paragraph :text => "<div class='error timeout'>The data you are trying to access could not be retrieved at this time. Please try reloading the page or accessing the information at a later time.</div>"
         else
           if editor?
-            return render_paragraph :text => "Error Fetching Feed"
+            return render_paragraph :text => "<div class='error feed'>Error Fetching Feed</div>"
           else
             cache[:output] = feed_page_show_feature
           end
